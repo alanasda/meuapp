@@ -7,10 +7,11 @@ app = Flask(__name__)
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    data = request.get_json()  # forma mais segura
+    data = request.json
 
-    email = data.get('email')
-    produto = data.get('produto', 'Produto')
+    # Corrigido: Pega o email dentro de "customer"
+    email = data.get('customer', {}).get('email')
+    produto = data.get('products', [{}])[0].get('name', 'Produto')
 
     if not email:
         return {'error': 'Email não encontrado'}, 400
@@ -22,7 +23,7 @@ def webhook():
 
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-            smtp.login('ferreiramateuss000@gmail.com', 'ixam jqaf ljsd iwjv')  # senha de app
+            smtp.login('ferreiramateuss000@gmail.com', 'ixam jqaf ljsd iwjv')
             smtp.send_message(msg)
         return {'status': 'Email enviado'}, 200
     except Exception as e:
